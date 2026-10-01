@@ -35,7 +35,7 @@
     <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
       <div>
         <h1 class="text-lg sm:text-xl font-bold">LMS Bahasa Indonesia XI</h1>
-        <p id="userInfo" class="text-xs text-indigo-200 mt-0.5">Status: Belum Login</p>
+        <p id="userInfo" class="text-xs text-indigo-200 mt-0.5">Status: Memeriksa Sesi...</p>
       </div>
       <button onclick="logout()" class="text-xs bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg border border-indigo-500 transition-colors">Keluar</button>
     </div>
@@ -81,17 +81,57 @@
 
   </main>
 
+  <!-- Kotak Kamera Pengawas Lokal (Floating Corner) -->
+  <div id="cameraBox" class="fixed bottom-4 right-4 z-50 bg-slate-900 p-2 rounded-xl shadow-2xl border-2 border-indigo-500 hidden w-44 sm:w-52">
+    <div class="relative">
+      <video id="webcam" autoplay playsinline muted class="w-full h-32 object-cover rounded-lg bg-black"></video>
+      <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse flex items-center gap-1">
+        <span class="w-1.5 h-1.5 bg-white rounded-full"></span> REC
+      </span>
+    </div>
+    <p class="text-[10px] text-slate-300 text-center mt-1.5 font-medium">Pengawasan Kamera Aktif</p>
+  </div>
+
   <footer class="bg-slate-800 text-slate-400 text-center py-4 text-xs mt-8">
     &copy; LMS Bahasa Indonesia Kelas XI — Akses Bebas & Cepat
   </footer>
 
   <script>
-    // URL WEB APP GOOGLE APPS SCRIPT ANDA
     const API_URL = "https://script.google.com/macros/s/AKfycbybg-V0XaqOT4W5yFqRdn9pE_pOuQzS9DaMwrESPDWwEVWyQ16HoxCxzCmn6bqczHYJhg/exec";
     
     let currentUser = null;
     let rawMateri = [];
     let rawProgres = [];
+
+    // FUNGSI KAMERA LOKAL
+    async function startWebcam() {
+      const video = document.getElementById('webcam');
+      const cameraBox = document.getElementById('cameraBox');
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          video.srcObject = stream;
+          cameraBox.classList.remove('hidden');
+        } catch (err) {
+          console.warn("Akses kamera tidak diizinkan atau tidak ada kamera:", err);
+        }
+      }
+    }
+
+    // PENGECEKAN SESI OTOMATIS SAAT RELOAD
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('lms_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('userInfo').textContent = `Siswa: ${currentUser.nama} (${currentUser.kelas})`;
+        startWebcam();
+        loadDashboard();
+      } else {
+        document.getElementById('userInfo').textContent = 'Status: Belum Login';
+      }
+    });
 
     async function handleLogin(e) {
       e.preventDefault();
@@ -111,8 +151,12 @@
 
         if (data.success) {
           currentUser = data.siswa;
+          localStorage.setItem('lms_user', JSON.stringify(currentUser));
+          
           document.getElementById('loginModal').classList.add('hidden');
           document.getElementById('userInfo').textContent = `Siswa: ${currentUser.nama} (${currentUser.kelas})`;
+          
+          startWebcam();
           loadDashboard();
         } else {
           showError(data.message);
@@ -221,7 +265,6 @@
         container.appendChild(card);
       });
 
-      // Update Panel Statistik
       document.getElementById('statTotal').textContent = total;
       document.getElementById('statSelesai').textContent = rawProgres.length;
       document.getElementById('statProgres').textContent = total > 0 ? Math.round((rawProgres.length / total) * 100) + '%' : '0%';
@@ -236,6 +279,7 @@
     }
 
     function logout() {
+      localStorage.removeItem('lms_user');
       location.reload();
     }
   </script>
