@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMS Bahasa Indonesia Kelas XI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <!-- Modal Login -->
+  <div id="loginModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border border-slate-200">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-slate-800">LMS Bahasa Indonesia</h2>
+        <p class="text-sm text-slate-500 mt-1">Kelas XI — Silakan Masuk dengan NIS</p>
+      </div>
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">NIS Siswa</label>
+          <input type="text" id="loginNis" required placeholder="Masukkan NIS" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+          <input type="password" id="loginPassword" required placeholder="Masukkan Password" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <p id="loginError" class="text-red-500 text-xs hidden"></p>
+        <button type="submit" id="btnLogin" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors shadow-md">Masuk ke LMS</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div>
+        <h1 class="text-lg sm:text-xl font-bold">LMS Bahasa Indonesia XI</h1>
+        <p id="userInfo" class="text-xs text-indigo-200 mt-0.5">Status: Belum Login</p>
+      </div>
+      <button onclick="logout()" class="text-xs bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg border border-indigo-500 transition-colors">Keluar</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
+    
+    <!-- Summary Stats Siswa -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+        <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Total Modul</span>
+        <p id="statTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+      </div>
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+        <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Modul Selesai</span>
+        <p id="statSelesai" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
+      </div>
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+        <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Progres Belajar</span>
+        <p id="statProgres" class="text-2xl font-bold text-indigo-600 mt-1">0%</p>
+      </div>
+    </div>
+
+    <!-- Filter Bab -->
+    <div class="mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+      <label for="filterBab" class="font-semibold text-slate-700 text-sm">Pilih Bab Pembelajaran:</label>
+      <select id="filterBab" onchange="filterMateri()" class="w-full sm:w-72 p-2.5 border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+        <option value="ALL">-- Semua Bab --</option>
+      </select>
+    </div>
+
+    <h2 class="text-xl font-bold mb-4 text-slate-800">Daftar Modul & Pembelajaran</h2>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="text-center py-12 hidden">
+      <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
+      <p class="mt-3 text-slate-600 font-medium">Memuat data pembelajaran...</p>
+    </div>
+
+    <!-- Cards Container -->
+    <div id="materiContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+  </main>
+
+  <footer class="bg-slate-800 text-slate-400 text-center py-4 text-xs mt-8">
+    &copy; LMS Bahasa Indonesia Kelas XI — Akses Bebas & Cepat
+  </footer>
+
+  <script>
+    // URL WEB APP GOOGLE APPS SCRIPT ANDA
+    const API_URL = "https://script.google.com/macros/s/AKfycbybg-V0XaqOT4W5yFqRdn9pE_pOuQzS9DaMwrESPDWwEVWyQ16HoxCxzCmn6bqczHYJhg/exec";
+    
+    let currentUser = null;
+    let rawMateri = [];
+    let rawProgres = [];
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const nis = document.getElementById('loginNis').value;
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('btnLogin');
+      
+      btn.textContent = "Memverifikasi...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'login', nis: nis, password: password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          currentUser = data.siswa;
+          document.getElementById('loginModal').classList.add('hidden');
+          document.getElementById('userInfo').textContent = `Siswa: ${currentUser.nama} (${currentUser.kelas})`;
+          loadDashboard();
+        } else {
+          showError(data.message);
+        }
+      } catch (err) {
+        showError("Koneksi gagal. Pastikan URL Apps Script sudah benar.");
+      } finally {
+        btn.textContent = "Masuk ke LMS";
+        btn.disabled = false;
+      }
+    }
+
+    function showError(msg) {
+      const err = document.getElementById('loginError');
+      err.textContent = msg;
+      err.classList.remove('hidden');
+    }
+
+    async function loadDashboard() {
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('materiContainer').innerHTML = '';
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'getDataSiswa', nis: currentUser.nis })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          rawMateri = data.materi;
+          rawProgres = data.progres;
+          populateBabFilter(rawMateri);
+          renderMateri(rawMateri, rawProgres);
+        }
+      } catch(e) {
+        console.error(e);
+      } finally {
+        document.getElementById('loading').classList.add('hidden');
+      }
+    }
+
+    function populateBabFilter(materi) {
+      const select = document.getElementById('filterBab');
+      select.innerHTML = '<option value="ALL">-- Semua Bab --</option>';
+      const babSet = new Set(materi.map(item => item.bab).filter(Boolean));
+      
+      babSet.forEach(bab => {
+        const opt = document.createElement('option');
+        opt.value = bab;
+        opt.textContent = bab;
+        select.appendChild(opt);
+      });
+    }
+
+    function filterMateri() {
+      const selected = document.getElementById('filterBab').value;
+      if (selected === 'ALL') {
+        renderMateri(rawMateri, rawProgres);
+      } else {
+        const filtered = rawMateri.filter(item => item.bab === selected);
+        renderMateri(filtered, rawProgres);
+      }
+    }
+
+    function renderMateri(materiList, progresList) {
+      const container = document.getElementById('materiContainer');
+      container.innerHTML = '';
+      
+      const total = rawMateri.length;
+
+      if (materiList.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center text-slate-500 py-8">Belum ada materi pada bab ini.</p>`;
+        return;
+      }
+
+      materiList.forEach(item => {
+        const isDone = rawProgres.some(p => String(p.materi_id) === String(item.id));
+
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between p-5 hover:shadow-md transition-shadow";
+
+        let videoEmbed = item.video_url ? `
+          <div class="aspect-video w-full bg-black rounded-lg overflow-hidden mb-4">
+            <iframe class="w-full h-full" src="${item.video_url}" frameborder="0" allowfullscreen></iframe>
+          </div>
+        ` : '';
+
+        card.innerHTML = `
+          <div>
+            ${videoEmbed}
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md uppercase tracking-wider">${item.bab || 'Umum'}</span>
+              ${isDone ? '<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">✓ Selesai</span>' : '<span class="text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">Belum dipelajari</span>'}
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">${item.judul}</h3>
+            <p class="text-slate-600 text-sm mb-4 whitespace-pre-line">${item.deskripsi}</p>
+          </div>
+          <div class="pt-4 border-t border-slate-100 flex flex-wrap gap-2 items-center justify-between">
+            <div class="flex gap-2">
+              ${item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg font-medium transition-colors">📄 Modul PDF</a>` : ''}
+            </div>
+            ${item.kuis_url ? `<a href="${item.kuis_url}" target="_blank" onclick="markComplete('${item.id}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded-lg font-medium transition-colors shadow-sm">📝 Kerjakan Kuis</a>` : `<button onclick="markComplete('${item.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-lg font-medium transition-colors shadow-sm">${isDone ? 'Tandai Ulang' : 'Tandai Selesai'}</button>`}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Update Panel Statistik
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statSelesai').textContent = rawProgres.length;
+      document.getElementById('statProgres').textContent = total > 0 ? Math.round((rawProgres.length / total) * 100) + '%' : '0%';
+    }
+
+    async function markComplete(materiId) {
+      await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'simpanProgres', nis: currentUser.nis, materi_id: materiId, status: 'Selesai' })
+      });
+      loadDashboard();
+    }
+
+    function logout() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>
