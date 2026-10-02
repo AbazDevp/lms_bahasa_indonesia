@@ -94,7 +94,7 @@
         <span>📖</span> Materi
       </button>
       <button id="tabBtnTugas" onclick="switchTab('tugas')" class="py-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-2">
-        <span>✍️</span> Tugas
+        <span>✍️️</span> Tugas
       </button>
       <button id="tabBtnRapor" onclick="switchTab('rapor')" class="py-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-2">
         <span>📊</span> Rapor & Nilai
@@ -230,8 +230,8 @@
   </footer>
 
   <script>
-    // URL Web App Google Apps Script Terbaru Anda
-    const API_URL = "https://script.google.com/macros/s/AKfycbybg-V0XaqOT4W5yFqRdn9pE_pOuQzS9DaMwrESPDWwEVWyQ16HoxCxzCmn6bqczHYJhg/exec";
+    // URL Web App Google Apps Script Terbaru
+    const API_URL = "https://script.google.com/macros/s/AKfycbwzzOfHqIdmjGR-kp1leP8cijMtAFDJqtfSnKXpJhxZc1z437-dCUxaiXtlyqO7aNrfgg/exec";
     
     let currentUser = null;
     let rawMateri = [];
@@ -504,7 +504,7 @@
         return;
       }
 
-      materiList.forEach((item, index) => {
+      materiList.forEach((item) => {
         const btn = document.createElement('button');
         btn.onclick = () => selectTugas(item);
         btn.className = "w-full text-left p-3 rounded-lg border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all text-xs font-medium text-slate-700 flex flex-col gap-1";
