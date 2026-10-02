@@ -5,608 +5,483 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LMS Bahasa Indonesia - SMA ABBS Surakarta</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-50 font-sans min-h-screen text-slate-800">
 
-  <!-- Modal Login (Siswa & Admin) -->
-  <div id="loginModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border border-slate-200">
-      
-      <!-- Form Login Siswa -->
-      <div id="formSiswaBox">
-        <div class="text-center mb-6">
-          <span class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Akses Siswa</span>
-          <h2 class="text-2xl font-bold text-slate-800 mt-2">SMA ABBS Surakarta</h2>
-          <p class="text-xs text-indigo-600 font-semibold mt-1">LMS Bahasa Indonesia</p>
-          <p class="text-[11px] text-slate-500 italic mt-1">"Utamakan Bahasa Indonesia, Pelajari Bahasa Asing, Lestarikan Bahasa Daerah"</p>
-        </div>
-        <form onsubmit="handleLoginSiswa(event)" class="space-y-4">
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">NIS Siswa</label>
-            <input type="text" id="loginNis" required placeholder="Masukkan NIS" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
-            <input type="password" id="loginPassword" required placeholder="Masukkan Password" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-          <p id="loginSiswaError" class="text-red-500 text-xs hidden"></p>
-          <button type="submit" id="btnLoginSiswa" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors shadow-md">Masuk sebagai Siswa</button>
-        </form>
-
-        <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-          <p class="text-xs text-slate-500">
-            Pengelola kelas / Guru? 
-            <button onclick="switchLoginMode('admin')" class="text-indigo-600 hover:underline font-bold ml-1">Login Admin / Guru di sini</button>
-          </p>
+  <!-- TOP NAVBAR -->
+  <header class="bg-emerald-700 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <i class="fa-solid font-bold text-2xl fa-book-bookmark text-amber-300"></i>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">LMS Bahasa Indonesia</h1>
+          <p class="text-xs text-emerald-200">SMA ABBS Surakarta</p>
         </div>
       </div>
-
-      <!-- Form Login Admin/Guru -->
-      <div id="formAdminBox" class="hidden">
-        <div class="text-center mb-6">
-          <span class="bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Akses Admin / Guru</span>
-          <h2 class="text-2xl font-bold text-slate-800 mt-2">SMA ABBS Surakarta</h2>
-          <p class="text-xs text-amber-600 font-semibold mt-1">Panel Pengelola LMS</p>
+      <div id="userNav" class="hidden flex items-center space-x-4">
+        <div class="text-right">
+          <p id="navUserName" class="font-semibold text-sm"></p>
+          <p id="navUserRole" class="text-xs text-emerald-200 uppercase"></p>
         </div>
-        <form onsubmit="handleLoginAdmin(event)" class="space-y-4">
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Username / Email Admin</label>
-            <input type="text" id="adminUser" required placeholder="Masukkan Username Admin" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Password Admin</label>
-            <input type="password" id="adminPass" required placeholder="Masukkan Password Admin" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
-          </div>
-          <p id="loginAdminError" class="text-red-500 text-xs hidden"></p>
-          <button type="submit" id="btnLoginAdmin" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors shadow-md">Masuk sebagai Admin</button>
-        </form>
-
-        <div class="mt-6 pt-4 border-t border-slate-100 text-center">
-          <p class="text-xs text-slate-500">
-            Bukan Admin? 
-            <button onclick="switchLoginMode('siswa')" class="text-indigo-600 hover:underline font-bold ml-1">Kembali ke Login Siswa</button>
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Header Utama -->
-  <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-      <div>
-        <span class="text-xs bg-indigo-800 text-indigo-200 px-2.5 py-0.5 rounded-full font-medium">SMA ABBS Surakarta</span>
-        <h1 class="text-xl sm:text-2xl font-bold mt-1">LMS Bahasa Indonesia</h1>
-        <p class="text-xs text-indigo-200 italic mt-0.5">"Utamakan Bahasa Indonesia, Pelajari Bahasa Asing, Lestarikan Bahasa Daerah"</p>
-      </div>
-      <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-        <p id="userInfo" class="text-xs text-indigo-100 font-medium">Status: Memeriksa Sesi...</p>
-        <button onclick="logout()" class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg border border-red-500 transition-colors shadow-sm">Keluar</button>
+        <button onclick="logout()" class="bg-emerald-800 hover:bg-emerald-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+          <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- Navigation Tabs (Materi, Tugas, Rapor) -->
-  <nav class="bg-white border-b border-slate-200 sticky top-[80px] z-30 shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 flex gap-2 sm:gap-6 overflow-x-auto">
-      <button id="tabBtnMateri" onclick="switchTab('materi')" class="py-3 px-4 font-semibold text-sm border-b-2 border-indigo-600 text-indigo-600 transition-colors flex items-center gap-2">
-        <span>📖</span> Materi
-      </button>
-      <button id="tabBtnTugas" onclick="switchTab('tugas')" class="py-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-2">
-        <span>✍️️</span> Tugas
-      </button>
-      <button id="tabBtnRapor" onclick="switchTab('rapor')" class="py-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-2">
-        <span>📊</span> Rapor & Nilai
-      </button>
-    </div>
-  </nav>
+  <!-- CONTAINER UTAMA -->
+  <main class="max-w-7xl mx-auto p-4 md:p-6">
 
-  <!-- Main Content Area -->
-  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
-    
-    <!-- Status Ringkasan Progres -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-        <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Total Modul</span>
-        <p id="statTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p>
-      </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-        <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Modul Selesai</span>
-        <p id="statSelesai" class="text-2xl font-bold text-emerald-600 mt-1">0</p>
-      </div>
-      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-        <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Progres Belajar</span>
-        <p id="statProgres" class="text-2xl font-bold text-indigo-600 mt-1">0%</p>
-      </div>
-    </div>
-
-    <!-- Indicator Loading -->
-    <div id="loading" class="text-center py-12 hidden">
-      <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
-      <p class="mt-3 text-slate-600 font-medium">Memuat data pembelajaran...</p>
-    </div>
-
-    <!-- TAB 1: SECTION MATERI -->
-    <section id="sectionMateri" class="tab-content">
-      <div class="mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <label for="filterBab" class="font-semibold text-slate-700 text-sm">Pilih Bab Pembelajaran:</label>
-        <select id="filterBab" onchange="filterMateri()" class="w-full sm:w-72 p-2.5 border border-slate-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
-          <option value="ALL">-- Semua Bab --</option>
-        </select>
-      </div>
-
-      <h2 class="text-xl font-bold mb-4 text-slate-800">Daftar Modul & Pembelajaran</h2>
-      <div id="materiContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-    </section>
-
-    <!-- TAB 2: SECTION TUGAS -->
-    <section id="sectionTugas" class="tab-content hidden">
-      <h2 class="text-xl font-bold mb-2 text-slate-800">Lembar Kerja & Pengumpulan Tugas</h2>
-      <p class="text-sm text-slate-600 mb-6">Silakan pilih tugas yang tersedia dan tuliskan jawaban Anda di kolom lembar kerja di bawah ini.</p>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Daftar Tugas -->
-        <div class="lg:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-          <h3 class="font-bold text-slate-800 mb-3 border-b pb-2 text-sm">Pilih Tugas</h3>
-          <div id="daftarTugasList" class="space-y-2">
-            <p class="text-xs text-slate-400 italic">Memuat daftar tugas...</p>
-          </div>
+    <!-- LOGIN CONTAINER -->
+    <div id="loginView" class="max-w-md mx-auto my-12 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+          <i class="fa-solid fa-graduation-cap"></i>
         </div>
+        <h2 class="text-2xl font-bold text-slate-800">Selamat Datang</h2>
+        <p class="text-sm text-slate-500">Silakan login ke portal pembelajaran</p>
+      </div>
 
-        <!-- Area Pengerjaan / Kolom Jawaban -->
-        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col">
-          <div id="detailTugasBox" class="mb-4">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Instruksi Tugas</span>
-            <h3 id="tugasJudul" class="text-lg font-bold text-slate-800 mt-1">Pilih tugas dari menu di samping</h3>
-            <p id="tugasDeskripsi" class="text-sm text-slate-600 mt-2 whitespace-pre-line">Klik salah satu tugas untuk membaca instruksi dan menuliskan jawaban Anda.</p>
+      <!-- TAB LOGIN -->
+      <div class="flex border-b border-slate-200 mb-6">
+        <button id="tabSiswa" onclick="switchLoginTab('siswa')" class="w-1/2 py-2 text-center text-sm font-semibold text-emerald-600 border-b-2 border-emerald-600">Siswa</button>
+        <button id="tabAdmin" onclick="switchLoginTab('admin')" class="w-1/2 py-2 text-center text-sm font-semibold text-slate-400 hover:text-slate-600">Guru / Admin</button>
+      </div>
+
+      <!-- FORM SISWA -->
+      <form id="formSiswa" onsubmit="handleLogin(event, 'siswa')" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">NIS (Nomor Induk Siswa)</label>
+          <input type="text" id="nisInput" required placeholder="Masukkan NIS Anda" class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+          <input type="password" id="passSiswaInput" required placeholder="••••••••" class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">Masuk Pembelajaran</button>
+      </form>
+
+      <!-- FORM ADMIN -->
+      <form id="formAdmin" onsubmit="handleLogin(event, 'admin')" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Username Admin / NIP</label>
+          <input type="text" id="userInput" required placeholder="Username Admin" class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+          <input type="password" id="passAdminInput" required placeholder="••••••••" class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2.5 rounded-lg text-sm transition">Masuk Panel Guru</button>
+      </form>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboardView" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+      <!-- SIDEBAR MONITORING WEBCAM (Siswa) -->
+      <div id="siswaWebcamPanel" class="lg:col-span-1 space-y-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pengawasan Aktif</h3>
+          <div class="relative w-full aspect-video bg-slate-900 rounded-lg overflow-hidden flex items-center justify-center">
+            <video id="webcam" autoplay playsinline muted class="w-full h-full object-cover"></video>
+            <span id="camStatus" class="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+              <span class="w-2 h-2 bg-white rounded-full animate-ping"></span> Live
+            </span>
           </div>
+          <p class="text-[11px] text-slate-400 mt-2">Kamera aktif untuk memantau integritas belajar mandiri.</p>
+        </div>
+      </div>
 
-          <form onsubmit="handleKirimTugas(event)" class="space-y-4 flex-grow flex flex-col">
-            <input type="hidden" id="selectedTugasId">
+      <!-- AREA UTAMA CONTENT -->
+      <div id="mainContentArea" class="lg:col-span-3 space-y-6">
+
+        <!-- CONTENT SISWA: MATERI & TUGAS -->
+        <div id="siswaDashboard" class="space-y-6">
+          <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex justify-between items-center">
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-1">
-                Kolom Pengerjaan Tugas (Lembar Kerja):
-              </label>
-              <textarea id="jawabanTugas" required rows="10" placeholder="Tuliskan jawaban lengkap Anda di sini..." class="w-full p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-sans leading-relaxed"></textarea>
+              <h2 class="font-bold text-emerald-900">Modul Pembelajaran Bahasa Indonesia</h2>
+              <p class="text-xs text-emerald-700">Pilih modul materi di bawah ini untuk memulai.</p>
             </div>
-            
-            <div class="flex items-center justify-between pt-2">
-              <span id="submitStatusMsg" class="text-xs font-medium"></span>
-              <button type="submit" id="btnSubmitTugas" disabled class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-semibold rounded-lg transition-colors text-sm shadow-sm">
-                Kirim Jawaban Tugas
-              </button>
+          </div>
+
+          <!-- LIST MATERI -->
+          <div id="materiList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Data Materi Inject via JS -->
+          </div>
+        </div>
+
+        <!-- CONTENT ADMIN / GURU -->
+        <div id="adminDashboard" class="hidden space-y-6">
+          <!-- FORM TAMBAH MATERI -->
+          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-plus-circle text-emerald-600 mr-2"></i>Tambah Materi Baru</h3>
+            <form onsubmit="handleTambahMateri(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Materi</label>
+                <input type="text" id="addJudul" required class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Bab / Unit</label>
+                <input type="text" id="addBab" required placeholder="Contoh: Bab 1 - Teks Laporan Hasil Observasi" class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi / Intisari Materi</label>
+                <textarea id="addDeskripsi" rows="2" required class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Link Video YouTube (Opsional)</label>
+                <input type="url" id="addLinkVideo" placeholder="https://youtube.com/..." class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Link PDF / Drive Materi (Opsional)</label>
+                <input type="url" id="addFileUrl" placeholder="https://drive.google.com/..." class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div class="md:col-span-2 text-right">
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">Simpan Materi</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- REKAP & INPUT NILAI TUGAS -->
+          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-list-check text-emerald-600 mr-2"></i>Rekapitulasi Tugas & Input Nilai</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-600">
+                <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                  <tr>
+                    <th class="p-3">Siswa</th>
+                    <th class="p-3">Materi ID</th>
+                    <th class="p-3">Berkas Tugas</th>
+                    <th class="p-3">Status / Nilai</th>
+                    <th class="p-3">Aksi / Penilaian</th>
+                  </tr>
+                </thead>
+                <tbody id="tableRekapBody" class="divide-y divide-slate-100">
+                  <!-- Inject via JS -->
+                </tbody>
+              </table>
             </div>
-          </form>
+          </div>
         </div>
+
       </div>
-    </section>
-
-    <!-- TAB 3: SECTION RAPOR -->
-    <section id="sectionRapor" class="tab-content hidden">
-      <h2 class="text-xl font-bold mb-2 text-slate-800">Rapor & Transkrip Nilai Siswa</h2>
-      <p class="text-sm text-slate-600 mb-6">Rekapitulasi pencapaian dan nilai kuis/tugas Anda di SMA ABBS Surakarta.</p>
-
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-4 bg-slate-50 border-b border-slate-200">
-          <h3 class="font-bold text-slate-700 text-sm">Riwayat Penilaian</h3>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
-              <tr>
-                <th class="p-3.5">Tanggal</th>
-                <th class="p-3.5">Kategori</th>
-                <th class="p-3.5">Judul Materi / Tugas</th>
-                <th class="p-3.5 text-center">Status</th>
-                <th class="p-3.5 text-right">Nilai</th>
-              </tr>
-            </thead>
-            <tbody id="raporTableBody" class="divide-y divide-slate-100">
-              <tr>
-                <td colspan="5" class="p-6 text-center text-slate-400 italic">Belum ada riwayat nilai.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
+    </div>
   </main>
 
-  <!-- Floating Camera Box -->
-  <div id="cameraBox" class="fixed bottom-4 right-4 z-50 bg-slate-900 p-2 rounded-xl shadow-2xl border-2 border-indigo-500 hidden w-44 sm:w-52">
-    <div class="relative">
-      <video id="webcam" autoplay playsinline muted class="w-full h-32 object-cover rounded-lg bg-black"></video>
-      <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse flex items-center gap-1">
-        <span class="w-1.5 h-1.5 bg-white rounded-full"></span> REC
-      </span>
+  <!-- MODAL KIRIM TUGAS SISWA -->
+  <div id="modalTugas" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl">
+      <h3 id="modalTugasTitle" class="font-bold text-slate-800 text-lg mb-2">Pengiriman Tugas</h3>
+      <p class="text-xs text-slate-500 mb-4">Unggah lembar jawaban atau dokumen tugas Anda (PDF/Gambar/Doc).</p>
+      
+      <form onsubmit="handleKirimTugas(event)" class="space-y-4">
+        <input type="hidden" id="modalMateriId">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih File Tugas</label>
+          <input type="file" id="fileTugasInput" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+        </div>
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="closeModalTugas()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
+          <button type="submit" id="btnSubmitTugas" class="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg">Kirim Berkas</button>
+        </div>
+      </form>
     </div>
-    <p class="text-[10px] text-slate-300 text-center mt-1.5 font-medium">Pengawasan Kamera Aktif</p>
   </div>
 
-  <footer class="bg-slate-800 text-slate-400 text-center py-4 text-xs mt-8">
-    &copy; LMS Bahasa Indonesia — SMA ABBS Surakarta
-  </footer>
-
   <script>
-    // URL Web App Google Apps Script Terbaru
-    const API_URL = "https://script.google.com/macros/s/AKfycbwzzOfHqIdmjGR-kp1leP8cijMtAFDJqtfSnKXpJhxZc1z437-dCUxaiXtlyqO7aNrfgg/exec";
-    
+    // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
+    const API_URL = "GANTI_DENGAN_URL_DEPLOYMENT_WEB_APP_GOOGLE_APPS_SCRIPT_ANDA";
+
     let currentUser = null;
-    let rawMateri = [];
-    let rawProgres = [];
-    let selectedTugas = null;
+    let currentRoleTab = "siswa";
 
-    // PINDAH TAB (MATERI, TUGAS, RAPOR)
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      
-      const btnMateri = document.getElementById('tabBtnMateri');
-      const btnTugas = document.getElementById('tabBtnTugas');
-      const btnRapor = document.getElementById('tabBtnRapor');
-
-      [btnMateri, btnTugas, btnRapor].forEach(btn => {
-        btn.className = "py-3 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-2";
-      });
-
-      if (tabName === 'materi') {
-        document.getElementById('sectionMateri').classList.remove('hidden');
-        btnMateri.className = "py-3 px-4 font-semibold text-sm border-b-2 border-indigo-600 text-indigo-600 transition-colors flex items-center gap-2";
-      } else if (tabName === 'tugas') {
-        document.getElementById('sectionTugas').classList.remove('hidden');
-        btnTugas.className = "py-3 px-4 font-semibold text-sm border-b-2 border-indigo-600 text-indigo-600 transition-colors flex items-center gap-2";
-      } else if (tabName === 'rapor') {
-        document.getElementById('sectionRapor').classList.remove('hidden');
-        btnRapor.className = "py-3 px-4 font-semibold text-sm border-b-2 border-indigo-600 text-indigo-600 transition-colors flex items-center gap-2";
-      }
-    }
-
-    // GANTI MODAL LOGIN
-    function switchLoginMode(mode) {
-      const siswaBox = document.getElementById('formSiswaBox');
-      const adminBox = document.getElementById('formAdminBox');
-      document.getElementById('loginSiswaError').classList.add('hidden');
-      document.getElementById('loginAdminError').classList.add('hidden');
-
-      if (mode === 'admin') {
-        siswaBox.classList.add('hidden');
-        adminBox.classList.remove('hidden');
-      } else {
-        adminBox.classList.add('hidden');
-        siswaBox.classList.remove('hidden');
-      }
-    }
-
-    // KAMERA LOKAL
-    async function startWebcam() {
-      const video = document.getElementById('webcam');
-      const cameraBox = document.getElementById('cameraBox');
-
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          video.srcObject = stream;
-          cameraBox.classList.remove('hidden');
-        } catch (err) {
-          console.warn("Kamera tidak diakses:", err);
-        }
-      }
-    }
-
-    // AUTO LOGIN
-    window.addEventListener('DOMContentLoaded', () => {
+    window.onload = function() {
       const savedUser = localStorage.getItem('lms_user');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
-        document.getElementById('loginModal').classList.add('hidden');
-        
-        if (currentUser.role === 'admin') {
-          document.getElementById('userInfo').textContent = `Admin: ${currentUser.nama || 'Pengelola'}`;
-        } else {
-          document.getElementById('userInfo').textContent = `Siswa: ${currentUser.nama} (${currentUser.kelas})`;
-          startWebcam();
-        }
-        
-        loadDashboard();
+        renderDashboard();
+      }
+    };
+
+    function switchLoginTab(role) {
+      currentRoleTab = role;
+      const tabSiswa = document.getElementById('tabSiswa');
+      const tabAdmin = document.getElementById('tabAdmin');
+      const formSiswa = document.getElementById('formSiswa');
+      const formAdmin = document.getElementById('formAdmin');
+
+      if (role === 'siswa') {
+        tabSiswa.className = "w-1/2 py-2 text-center text-sm font-semibold text-emerald-600 border-b-2 border-emerald-600";
+        tabAdmin.className = "w-1/2 py-2 text-center text-sm font-semibold text-slate-400 hover:text-slate-600";
+        formSiswa.classList.remove('hidden');
+        formAdmin.classList.add('hidden');
       } else {
-        document.getElementById('userInfo').textContent = 'Status: Belum Login';
+        tabAdmin.className = "w-1/2 py-2 text-center text-sm font-semibold text-emerald-600 border-b-2 border-emerald-600";
+        tabSiswa.className = "w-1/2 py-2 text-center text-sm font-semibold text-slate-400 hover:text-slate-600";
+        formAdmin.classList.remove('hidden');
+        formSiswa.classList.add('hidden');
       }
-    });
+    }
 
-    // LOGIN SISWA
-    async function handleLoginSiswa(e) {
+    async function handleLogin(e, role) {
       e.preventDefault();
-      const nis = document.getElementById('loginNis').value;
-      const password = document.getElementById('loginPassword').value;
-      const btn = document.getElementById('btnLoginSiswa');
-      
-      btn.textContent = "Memverifikasi...";
-      btn.disabled = true;
+      let payload = {};
 
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'login', nis: nis, password: password })
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          currentUser = { ...data.siswa, role: 'siswa' };
-          localStorage.setItem('lms_user', JSON.stringify(currentUser));
-          
-          document.getElementById('loginModal').classList.add('hidden');
-          document.getElementById('userInfo').textContent = `Siswa: ${currentUser.nama} (${currentUser.kelas})`;
-          
-          startWebcam();
-          loadDashboard();
-        } else {
-          showError('siswa', data.message);
-        }
-      } catch (err) {
-        showError('siswa', "Koneksi gagal ke server Apps Script.");
-      } finally {
-        btn.textContent = "Masuk sebagai Siswa";
-        btn.disabled = false;
-      }
-    }
-
-    // LOGIN ADMIN
-    async function handleLoginAdmin(e) {
-      e.preventDefault();
-      const adminUser = document.getElementById('adminUser').value;
-      const adminPass = document.getElementById('adminPass').value;
-      const btn = document.getElementById('btnLoginAdmin');
-
-      btn.textContent = "Memverifikasi...";
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'loginAdmin', username: adminUser, password: adminPass })
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          currentUser = { nama: data.nama || adminUser, role: 'admin' };
-          localStorage.setItem('lms_user', JSON.stringify(currentUser));
-
-          document.getElementById('loginModal').classList.add('hidden');
-          document.getElementById('userInfo').textContent = `Admin: ${currentUser.nama}`;
-          loadDashboard();
-        } else {
-          showError('admin', data.message || "Username atau Password Admin salah.");
-        }
-      } catch (err) {
-        showError('admin', "Koneksi gagal ke server Apps Script.");
-      } finally {
-        btn.textContent = "Masuk sebagai Admin";
-        btn.disabled = false;
-      }
-    }
-
-    function showError(target, msg) {
-      const err = document.getElementById(target === 'admin' ? 'loginAdminError' : 'loginSiswaError');
-      err.textContent = msg;
-      err.classList.remove('hidden');
-    }
-
-    // LOAD DATA UTAMA
-    async function loadDashboard() {
-      document.getElementById('loading').classList.remove('hidden');
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ 
-            action: 'getDataSiswa', 
-            nis: currentUser.role === 'siswa' ? currentUser.nis : 'ADMIN' 
-          })
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          rawMateri = data.materi || [];
-          rawProgres = data.progres || [];
-          
-          populateBabFilter(rawMateri);
-          renderMateri(rawMateri, rawProgres);
-          renderTugasList(rawMateri);
-          renderRapor(rawProgres);
-        }
-      } catch(e) {
-        console.error(e);
-      } finally {
-        document.getElementById('loading').classList.add('hidden');
-      }
-    }
-
-    function populateBabFilter(materi) {
-      const select = document.getElementById('filterBab');
-      select.innerHTML = '<option value="ALL">-- Semua Bab --</option>';
-      const babSet = new Set(materi.map(item => item.bab).filter(Boolean));
-      
-      babSet.forEach(bab => {
-        const opt = document.createElement('option');
-        opt.value = bab;
-        opt.textContent = bab;
-        select.appendChild(opt);
-      });
-    }
-
-    function filterMateri() {
-      const selected = document.getElementById('filterBab').value;
-      if (selected === 'ALL') {
-        renderMateri(rawMateri, rawProgres);
+      if (role === 'siswa') {
+        payload = {
+          action: 'login',
+          nis: document.getElementById('nisInput').value,
+          password: document.getElementById('passSiswaInput').value
+        };
       } else {
-        const filtered = rawMateri.filter(item => item.bab === selected);
-        renderMateri(filtered, rawProgres);
+        payload = {
+          action: 'loginAdmin',
+          username: document.getElementById('userInput').value,
+          password: document.getElementById('passAdminInput').value
+        };
       }
-    }
-
-    // RENDER TAB MATERI
-    function renderMateri(materiList, progresList) {
-      const container = document.getElementById('materiContainer');
-      container.innerHTML = '';
-      
-      const total = rawMateri.length;
-
-      if (materiList.length === 0) {
-        container.innerHTML = `<p class="col-span-full text-center text-slate-500 py-8">Belum ada materi pada bab ini.</p>`;
-        return;
-      }
-
-      materiList.forEach(item => {
-        const isDone = progresList.some(p => String(p.materi_id) === String(item.id));
-
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between p-5 hover:shadow-md transition-shadow";
-
-        let videoEmbed = item.video_url ? `
-          <div class="aspect-video w-full bg-black rounded-lg overflow-hidden mb-4">
-            <iframe class="w-full h-full" src="${item.video_url}" frameborder="0" allowfullscreen></iframe>
-          </div>
-        ` : '';
-
-        card.innerHTML = `
-          <div>
-            ${videoEmbed}
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md uppercase tracking-wider">${item.bab || 'Umum'}</span>
-              ${isDone ? '<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">✓ Selesai</span>' : '<span class="text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">Belum dipelajari</span>'}
-            </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">${item.judul}</h3>
-            <p class="text-slate-600 text-sm mb-4 whitespace-pre-line">${item.deskripsi}</p>
-          </div>
-          <div class="pt-4 border-t border-slate-100 flex flex-wrap gap-2 items-center justify-between">
-            <div class="flex gap-2">
-              ${item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg font-medium transition-colors">📄 Modul PDF</a>` : ''}
-            </div>
-            ${item.kuis_url ? `<a href="${item.kuis_url}" target="_blank" onclick="markComplete('${item.id}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded-lg font-medium transition-colors shadow-sm">📝 Kerjakan Kuis</a>` : `<button onclick="markComplete('${item.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-lg font-medium transition-colors shadow-sm">${isDone ? 'Tandai Ulang' : 'Tandai Selesai'}</button>`}
-          </div>
-        `;
-        container.appendChild(card);
-      });
-
-      document.getElementById('statTotal').textContent = total;
-      document.getElementById('statSelesai').textContent = progresList.length;
-      document.getElementById('statProgres').textContent = total > 0 ? Math.round((progresList.length / total) * 100) + '%' : '0%';
-    }
-
-    // RENDER DAFTAR TUGAS
-    function renderTugasList(materiList) {
-      const container = document.getElementById('daftarTugasList');
-      container.innerHTML = '';
-
-      if (materiList.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada tugas yang disajikan.</p>`;
-        return;
-      }
-
-      materiList.forEach((item) => {
-        const btn = document.createElement('button');
-        btn.onclick = () => selectTugas(item);
-        btn.className = "w-full text-left p-3 rounded-lg border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all text-xs font-medium text-slate-700 flex flex-col gap-1";
-        btn.innerHTML = `
-          <span class="text-[10px] text-indigo-600 font-bold uppercase">${item.bab || 'Tugas'}</span>
-          <span class="font-bold text-slate-800">${item.judul}</span>
-        `;
-        container.appendChild(btn);
-      });
-    }
-
-    // PILIH TUGAS KE LEMBAR KERJA
-    function selectTugas(item) {
-      selectedTugas = item;
-      document.getElementById('selectedTugasId').value = item.id;
-      document.getElementById('tugasJudul').textContent = item.judul;
-      document.getElementById('tugasDeskripsi').textContent = item.deskripsi || 'Silakan kerjakan tugas sesuai arahan guru.';
-      document.getElementById('btnSubmitTugas').disabled = false;
-      document.getElementById('submitStatusMsg').textContent = "";
-      document.getElementById('jawabanTugas').value = "";
-    }
-
-    // KIRIM JAWABAN TUGAS
-    async function handleKirimTugas(e) {
-      e.preventDefault();
-      if (!selectedTugas) return;
-
-      const jawaban = document.getElementById('jawabanTugas').value;
-      const btn = document.getElementById('btnSubmitTugas');
-      const statusMsg = document.getElementById('submitStatusMsg');
-
-      btn.disabled = true;
-      btn.textContent = "Mengirim...";
-      statusMsg.className = "text-xs font-medium text-slate-500";
-      statusMsg.textContent = "Sedang mengirim ke guru...";
 
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify({ 
-            action: 'kirimTugas', 
-            nis: currentUser.nis, 
-            materi_id: selectedTugas.id,
-            jawaban: jawaban
-          })
+          body: JSON.stringify(payload)
         });
-        const data = await res.json();
+        const result = await res.json();
 
-        if (data.success) {
-          statusMsg.className = "text-xs font-medium text-emerald-600";
-          statusMsg.textContent = "✓ Tugas berhasil dikirim!";
-          document.getElementById('jawabanTugas').value = "";
-          markComplete(selectedTugas.id);
+        if (result.success) {
+          currentUser = result.user;
+          localStorage.setItem('lms_user', JSON.stringify(currentUser));
+          renderDashboard();
         } else {
-          statusMsg.className = "text-xs font-medium text-red-500";
-          statusMsg.textContent = "Gagal mengirim tugas. Coba lagi.";
+          alert(result.message);
         }
       } catch (err) {
-        statusMsg.className = "text-xs font-medium text-red-500";
-        statusMsg.textContent = "Terjadi kesalahan koneksi.";
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Kirim Jawaban Tugas";
+        alert("Gagal terhubung ke server: " + err.message);
       }
     }
 
-    // RENDER TAB RAPOR
-    function renderRapor(progresList) {
-      const tbody = document.getElementById('raporTableBody');
-      tbody.innerHTML = '';
+    function renderDashboard() {
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('dashboardView').classList.remove('hidden');
+      document.getElementById('userNav').classList.remove('hidden');
 
-      if (!progresList || progresList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Belum ada riwayat aktivitas atau nilai yang tercatat.</td></tr>`;
-        return;
+      document.getElementById('navUserName').innerText = currentUser.nama;
+      document.getElementById('navUserRole').innerText = currentUser.role;
+
+      if (currentUser.role === 'siswa') {
+        document.getElementById('siswaDashboard').classList.remove('hidden');
+        document.getElementById('adminDashboard').classList.add('hidden');
+        document.getElementById('siswaWebcamPanel').classList.remove('hidden');
+        document.getElementById('mainContentArea').className = "lg:col-span-3 space-y-6";
+        startWebcam();
+        loadMateri();
+      } else {
+        document.getElementById('siswaDashboard').classList.add('hidden');
+        document.getElementById('adminDashboard').classList.remove('hidden');
+        document.getElementById('siswaWebcamPanel').classList.add('hidden');
+        document.getElementById('mainContentArea').className = "lg:col-span-4 space-y-6";
+        loadRekapAdmin();
       }
-
-      progresList.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition-colors";
-        tr.innerHTML = `
-          <td class="p-3.5 text-slate-500 text-xs">${p.tanggal || '-'}</td>
-          <td class="p-3.5"><span class="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded">Tugas/Kuis</span></td>
-          <td class="p-3.5 font-semibold text-slate-800">${p.materi_judul || 'Modul ID: ' + p.materi_id}</td>
-          <td class="p-3.5 text-center"><span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-medium">Selesai</span></td>
-          <td class="p-3.5 text-right font-bold text-slate-800">${p.nilai !== undefined ? p.nilai : '100'}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function markComplete(materiId) {
-      if (!currentUser || currentUser.role === 'admin') return;
-      await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'simpanProgres', nis: currentUser.nis, materi_id: materiId, status: 'Selesai' })
-      });
-      loadDashboard();
     }
 
     function logout() {
       localStorage.removeItem('lms_user');
       location.reload();
+    }
+
+    // WEBCAM FUNCTIONALITY
+    function startWebcam() {
+      const video = document.getElementById('webcam');
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => { video.srcObject = stream; })
+          .catch(err => {
+            console.warn("Kamera tidak diakses:", err);
+            document.getElementById('camStatus').innerHTML = "Nonaktif";
+            document.getElementById('camStatus').className = "absolute top-2 left-2 bg-slate-500 text-white text-[10px] px-2 py-0.5 rounded-full";
+          });
+      }
+    }
+
+    // LOAD DATA MATERI
+    async function loadMateri() {
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'getMateriList' })
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+          const container = document.getElementById('materiList');
+          container.innerHTML = "";
+
+          result.data.forEach(m => {
+            container.innerHTML += `
+              <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-600 bg-emerald-50 px-2 py-1 rounded">${m.bab}</span>
+                  <h3 class="font-bold text-slate-800 text-base mt-2">${m.judul}</h3>
+                  <p class="text-xs text-slate-500 mt-1 line-clamp-3">${m.deskripsi}</p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                  ${m.linkVideo ? `<a href="${m.linkVideo}" target="_blank" class="text-xs text-red-600 hover:underline flex items-center"><i class="fa-brands fa-youtube mr-1"></i> Video</a>` : '<span></span>'}
+                  <button onclick="openModalTugas('${m.id}', '${m.judul}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Kirim Tugas</button>
+                </div>
+              </div>
+            `;
+          });
+        }
+      } catch (err) {
+        console.error("Gagal memuat materi", err);
+      }
+    }
+
+    // KIRIM TUGAS SISWA
+    function openModalTugas(id, judul) {
+      document.getElementById('modalMateriId').value = id;
+      document.getElementById('modalTugasTitle').innerText = "Tugas: " + judul;
+      document.getElementById('modalTugas').classList.remove('hidden');
+    }
+
+    function closeModalTugas() {
+      document.getElementById('modalTugas').classList.add('hidden');
+    }
+
+    async function handleKirimTugas(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitTugas');
+      btn.innerText = "Mengirim...";
+      btn.disabled = true;
+
+      const fileInput = document.getElementById('fileTugasInput').files[0];
+      const materiId = document.getElementById('modalMateriId').value;
+
+      const reader = new FileReader();
+      reader.onload = async function() {
+        const base64Data = reader.result.split(',')[1];
+        
+        const payload = {
+          action: 'kirimTugas',
+          nis: currentUser.id,
+          namaSiswa: currentUser.nama,
+          materiId: materiId,
+          fileName: fileInput.name,
+          fileType: fileInput.type,
+          fileBase64: base64Data
+        };
+
+        try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          alert(result.message);
+          closeModalTugas();
+        } catch (err) {
+          alert("Gagal mengunggah tugas: " + err.message);
+        } finally {
+          btn.innerText = "Kirim Berkas";
+          btn.disabled = false;
+        }
+      };
+      reader.readAsDataURL(fileInput);
+    }
+
+    // ADMIN: TAMBAH MATERI
+    async function handleTambahMateri(e) {
+      e.preventDefault();
+      const payload = {
+        action: 'tambahMateri',
+        judul: document.getElementById('addJudul').value,
+        bab: document.getElementById('addBab').value,
+        deskripsi: document.getElementById('addDeskripsi').value,
+        linkVideo: document.getElementById('addLinkVideo').value,
+        fileUrl: document.getElementById('addFileUrl').value
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        alert(result.message);
+        e.target.reset();
+      } catch (err) {
+        alert("Gagal menambahkan materi: " + err.message);
+      }
+    }
+
+    // ADMIN: REKAP & INPUT NILAI
+    async function loadRekapAdmin() {
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'getRekapNilai' })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          const tbody = document.getElementById('tableRekapBody');
+          tbody.innerHTML = "";
+
+          result.data.forEach(r => {
+            tbody.innerHTML += `
+              <tr class="hover:bg-slate-50">
+                <td class="p-3">
+                  <p class="font-bold text-slate-800">${r.nama}</p>
+                  <p class="text-[10px] text-slate-400">NIS: ${r.nis}</p>
+                </td>
+                <td class="p-3 font-mono">${r.materiId}</td>
+                <td class="p-3">
+                  ${r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="text-emerald-600 underline font-semibold"><i class="fa-solid fa-file-arrow-down mr-1"></i> Buka File</a>` : '-'}
+                </td>
+                <td class="p-3">
+                  <span class="px-2 py-0.5 text-[10px] rounded font-bold ${r.nilai ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
+                    ${r.nilai ? 'Nilai: ' + r.nilai : r.status}
+                  </span>
+                </td>
+                <td class="p-3">
+                  <div class="flex items-center space-x-1">
+                    <input type="number" id="nilai_${r.tugasId}" placeholder="0-100" class="w-16 px-2 py-1 border rounded outline-none text-xs">
+                    <button onclick="submitNilai('${r.tugasId}')" class="bg-slate-800 hover:bg-slate-900 text-white text-[10px] px-2 py-1 rounded">Simpan</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          });
+        }
+      } catch (err) {
+        console.error("Gagal memuat rekap admin", err);
+      }
+    }
+
+    async function submitNilai(tugasId) {
+      const nilaiVal = document.getElementById(`nilai_${tugasId}`).value;
+      if (!nilaiVal) return alert("Masukkan nilai angka dahulu!");
+
+      const payload = {
+        action: 'inputNilai',
+        tugasId: tugasId,
+        nilai: nilaiVal,
+        catatan: 'Telah dikoreksi oleh guru.'
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        alert(result.message);
+        loadRekapAdmin();
+      } catch (err) {
+        alert("Gagal menyimpan nilai: " + err.message);
+      }
     }
   </script>
 </body>
