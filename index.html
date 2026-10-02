@@ -3,486 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LMS Bahasa Indonesia - SMA ABBS Surakarta</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <title>Aplikasi Web App Google Apps Script</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .card-custom {
+      max-width: 500px;
+      margin: 50px auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
-<body class="bg-slate-50 font-sans min-h-screen text-slate-800">
+<body>
 
-  <!-- TOP NAVBAR -->
-  <header class="bg-emerald-700 text-white shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
-        <i class="fa-solid font-bold text-2xl fa-book-bookmark text-amber-300"></i>
-        <div>
-          <h1 class="font-bold text-lg leading-tight">LMS Bahasa Indonesia</h1>
-          <p class="text-xs text-emerald-200">SMA ABBS Surakarta</p>
+  <div class="container">
+    <div class="card card-custom p-4 bg-white">
+      <h3 class="text-center mb-3 text-primary">Form Input Data</h3>
+      <p class="text-muted text-center small mb-4">Data akan dikirim dan disimpan ke Google Sheets</p>
+
+      <form id="dataForm">
+        <div class="mb-3">
+          <label for="nama" class="form-label font-weight-bold">Nama Lengkap</label>
+          <input type="text" class="form-control" id="nama" name="nama" placeholder="Masukkan nama..." required>
         </div>
-      </div>
-      <div id="userNav" class="hidden flex items-center space-x-4">
-        <div class="text-right">
-          <p id="navUserName" class="font-semibold text-sm"></p>
-          <p id="navUserRole" class="text-xs text-emerald-200 uppercase"></p>
+
+        <div class="mb-3">
+          <label for="email" class="form-label font-weight-bold">Alamat Email</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="contoh@email.com" required>
         </div>
-        <button onclick="logout()" class="bg-emerald-800 hover:bg-emerald-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-          <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+
+        <div class="mb-3">
+          <label for="pesan" class="form-label font-weight-bold">Pesan / Catatan</label>
+          <textarea class="form-control" id="pesan" name="pesan" rows="3" placeholder="Tuliskan pesan Anda..."></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary w-100">
+          Kirim Data
         </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- CONTAINER UTAMA -->
-  <main class="max-w-7xl mx-auto p-4 md:p-6">
-
-    <!-- LOGIN CONTAINER -->
-    <div id="loginView" class="max-w-md mx-auto my-12 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-      <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
-          <i class="fa-solid fa-graduation-cap"></i>
-        </div>
-        <h2 class="text-2xl font-bold text-slate-800">Selamat Datang</h2>
-        <p class="text-sm text-slate-500">Silakan login ke portal pembelajaran</p>
-      </div>
-
-      <!-- TAB LOGIN -->
-      <div class="flex border-b border-slate-200 mb-6">
-        <button id="tabSiswa" onclick="switchLoginTab('siswa')" class="w-1/2 py-2 text-center text-sm font-semibold text-emerald-600 border-b-2 border-emerald-600">Siswa</button>
-        <button id="tabAdmin" onclick="switchLoginTab('admin')" class="w-1/2 py-2 text-center text-sm font-semibold text-slate-400 hover:text-slate-600">Guru / Admin</button>
-      </div>
-
-      <!-- FORM SISWA -->
-      <form id="formSiswa" onsubmit="handleLogin(event, 'siswa')" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">NIS (Nomor Induk Siswa)</label>
-          <input type="text" id="nisInput" required placeholder="Masukkan NIS Anda" class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-          <input type="password" id="passSiswaInput" required placeholder="••••••••" class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-        </div>
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">Masuk Pembelajaran</button>
       </form>
 
-      <!-- FORM ADMIN -->
-      <form id="formAdmin" onsubmit="handleLogin(event, 'admin')" class="space-y-4 hidden">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Username Admin / NIP</label>
-          <input type="text" id="userInput" required placeholder="Username Admin" class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-          <input type="password" id="passAdminInput" required placeholder="••••••••" class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
-        </div>
-        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2.5 rounded-lg text-sm transition">Masuk Panel Guru</button>
-      </form>
-    </div>
-
-    <!-- DASHBOARD VIEW -->
-    <div id="dashboardView" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6">
-
-      <!-- SIDEBAR MONITORING WEBCAM (Siswa) -->
-      <div id="siswaWebcamPanel" class="lg:col-span-1 space-y-4">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
-          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pengawasan Aktif</h3>
-          <div class="relative w-full aspect-video bg-slate-900 rounded-lg overflow-hidden flex items-center justify-center">
-            <video id="webcam" autoplay playsinline muted class="w-full h-full object-cover"></video>
-            <span id="camStatus" class="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
-              <span class="w-2 h-2 bg-white rounded-full animate-ping"></span> Live
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-400 mt-2">Kamera aktif untuk memantau integritas belajar mandiri.</p>
-        </div>
-      </div>
-
-      <!-- AREA UTAMA CONTENT -->
-      <div id="mainContentArea" class="lg:col-span-3 space-y-6">
-
-        <!-- CONTENT SISWA: MATERI & TUGAS -->
-        <div id="siswaDashboard" class="space-y-6">
-          <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex justify-between items-center">
-            <div>
-              <h2 class="font-bold text-emerald-900">Modul Pembelajaran Bahasa Indonesia</h2>
-              <p class="text-xs text-emerald-700">Pilih modul materi di bawah ini untuk memulai.</p>
-            </div>
-          </div>
-
-          <!-- LIST MATERI -->
-          <div id="materiList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Data Materi Inject via JS -->
-          </div>
-        </div>
-
-        <!-- CONTENT ADMIN / GURU -->
-        <div id="adminDashboard" class="hidden space-y-6">
-          <!-- FORM TAMBAH MATERI -->
-          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-plus-circle text-emerald-600 mr-2"></i>Tambah Materi Baru</h3>
-            <form onsubmit="handleTambahMateri(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Materi</label>
-                <input type="text" id="addJudul" required class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Bab / Unit</label>
-                <input type="text" id="addBab" required placeholder="Contoh: Bab 1 - Teks Laporan Hasil Observasi" class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi / Intisari Materi</label>
-                <textarea id="addDeskripsi" rows="2" required class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Link Video YouTube (Opsional)</label>
-                <input type="url" id="addLinkVideo" placeholder="https://youtube.com/..." class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Link PDF / Drive Materi (Opsional)</label>
-                <input type="url" id="addFileUrl" placeholder="https://drive.google.com/..." class="w-full px-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
-              </div>
-              <div class="md:col-span-2 text-right">
-                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">Simpan Materi</button>
-              </div>
-            </form>
-          </div>
-
-          <!-- REKAP & INPUT NILAI TUGAS -->
-          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-list-check text-emerald-600 mr-2"></i>Rekapitulasi Tugas & Input Nilai</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-600">
-                <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
-                  <tr>
-                    <th class="p-3">Siswa</th>
-                    <th class="p-3">Materi ID</th>
-                    <th class="p-3">Berkas Tugas</th>
-                    <th class="p-3">Status / Nilai</th>
-                    <th class="p-3">Aksi / Penilaian</th>
-                  </tr>
-                </thead>
-                <tbody id="tableRekapBody" class="divide-y divide-slate-100">
-                  <!-- Inject via JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </main>
-
-  <!-- MODAL KIRIM TUGAS SISWA -->
-  <div id="modalTugas" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
-    <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl">
-      <h3 id="modalTugasTitle" class="font-bold text-slate-800 text-lg mb-2">Pengiriman Tugas</h3>
-      <p class="text-xs text-slate-500 mb-4">Unggah lembar jawaban atau dokumen tugas Anda (PDF/Gambar/Doc).</p>
-      
-      <form onsubmit="handleKirimTugas(event)" class="space-y-4">
-        <input type="hidden" id="modalMateriId">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih File Tugas</label>
-          <input type="file" id="fileTugasInput" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-        </div>
-        <div class="flex justify-end space-x-2 pt-2">
-          <button type="button" onclick="closeModalTugas()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
-          <button type="submit" id="btnSubmitTugas" class="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg">Kirim Berkas</button>
-        </div>
-      </form>
+      <!-- Tempat Notifikasi Status -->
+      <div id="alertMessage" class="mt-3"></div>
     </div>
   </div>
 
   <script>
-    // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
-    const API_URL = "GANTI_DENGAN_URL_DEPLOYMENT_WEB_APP_GOOGLE_APPS_SCRIPT_ANDA";
+    // Menggunakan URL aktif Web App secara otomatis
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzFZnE2EhfmEoJzOOJD1LGp5gI2c91zTXDvWcXBWvPGccQye3GAKvrZvZL14naPq-kq0w/exec";
 
-    let currentUser = null;
-    let currentRoleTab = "siswa";
-
-    window.onload = function() {
-      const savedUser = localStorage.getItem('lms_user');
-      if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        renderDashboard();
-      }
-    };
-
-    function switchLoginTab(role) {
-      currentRoleTab = role;
-      const tabSiswa = document.getElementById('tabSiswa');
-      const tabAdmin = document.getElementById('tabAdmin');
-      const formSiswa = document.getElementById('formSiswa');
-      const formAdmin = document.getElementById('formAdmin');
-
-      if (role === 'siswa') {
-        tabSiswa.className = "w-1/2 py-2 text-center text-sm font-semibold text-emerald-600 border-b-2 border-emerald-600";
-        tabAdmin.className = "w-1/2 py-2 text-center text-sm font-semibold text-slate-400 hover:text-slate-600";
-        formSiswa.classList.remove('hidden');
-        formAdmin.classList.add('hidden');
-      } else {
-        tabAdmin.className = "w-1/2 py-2 text-center text-sm font-semibold text-emerald-600 border-b-2 border-emerald-600";
-        tabSiswa.className = "w-1/2 py-2 text-center text-sm font-semibold text-slate-400 hover:text-slate-600";
-        formAdmin.classList.remove('hidden');
-        formSiswa.classList.add('hidden');
-      }
-    }
-
-    async function handleLogin(e, role) {
+    document.getElementById("dataForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      let payload = {};
 
-      if (role === 'siswa') {
-        payload = {
-          action: 'login',
-          nis: document.getElementById('nisInput').value,
-          password: document.getElementById('passSiswaInput').value
-        };
-      } else {
-        payload = {
-          action: 'loginAdmin',
-          username: document.getElementById('userInput').value,
-          password: document.getElementById('passAdminInput').value
-        };
-      }
+      const submitBtn = document.getElementById("submitBtn");
+      const alertMessage = document.getElementById("alertMessage");
 
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
+      // Set status tombol menjadi loading
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengirim...`;
+      alertMessage.innerHTML = '';
 
-        if (result.success) {
-          currentUser = result.user;
-          localStorage.setItem('lms_user', JSON.stringify(currentUser));
-          renderDashboard();
+      // Ambil data dari form
+      const payload = {
+        nama: document.getElementById("nama").value,
+        email: document.getElementById("email").value,
+        pesan: document.getElementById("pesan").value
+      };
+
+      // Kirim data menggunakan fetch API
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload),
+        redirect: "follow"
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "success") {
+          alertMessage.innerHTML = `
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <strong>Berhasil!</strong> ${data.message}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+          document.getElementById("dataForm").reset();
         } else {
-          alert(result.message);
+          alertMessage.innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <strong>Gagal!</strong> ${data.message}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
         }
-      } catch (err) {
-        alert("Gagal terhubung ke server: " + err.message);
-      }
-    }
-
-    function renderDashboard() {
-      document.getElementById('loginView').classList.add('hidden');
-      document.getElementById('dashboardView').classList.remove('hidden');
-      document.getElementById('userNav').classList.remove('hidden');
-
-      document.getElementById('navUserName').innerText = currentUser.nama;
-      document.getElementById('navUserRole').innerText = currentUser.role;
-
-      if (currentUser.role === 'siswa') {
-        document.getElementById('siswaDashboard').classList.remove('hidden');
-        document.getElementById('adminDashboard').classList.add('hidden');
-        document.getElementById('siswaWebcamPanel').classList.remove('hidden');
-        document.getElementById('mainContentArea').className = "lg:col-span-3 space-y-6";
-        startWebcam();
-        loadMateri();
-      } else {
-        document.getElementById('siswaDashboard').classList.add('hidden');
-        document.getElementById('adminDashboard').classList.remove('hidden');
-        document.getElementById('siswaWebcamPanel').classList.add('hidden');
-        document.getElementById('mainContentArea').className = "lg:col-span-4 space-y-6";
-        loadRekapAdmin();
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('lms_user');
-      location.reload();
-    }
-
-    // WEBCAM FUNCTIONALITY
-    function startWebcam() {
-      const video = document.getElementById('webcam');
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => { video.srcObject = stream; })
-          .catch(err => {
-            console.warn("Kamera tidak diakses:", err);
-            document.getElementById('camStatus').innerHTML = "Nonaktif";
-            document.getElementById('camStatus').className = "absolute top-2 left-2 bg-slate-500 text-white text-[10px] px-2 py-0.5 rounded-full";
-          });
-      }
-    }
-
-    // LOAD DATA MATERI
-    async function loadMateri() {
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'getMateriList' })
-        });
-        const result = await res.json();
-        
-        if (result.success) {
-          const container = document.getElementById('materiList');
-          container.innerHTML = "";
-
-          result.data.forEach(m => {
-            container.innerHTML += `
-              <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                <div>
-                  <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-600 bg-emerald-50 px-2 py-1 rounded">${m.bab}</span>
-                  <h3 class="font-bold text-slate-800 text-base mt-2">${m.judul}</h3>
-                  <p class="text-xs text-slate-500 mt-1 line-clamp-3">${m.deskripsi}</p>
-                </div>
-                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  ${m.linkVideo ? `<a href="${m.linkVideo}" target="_blank" class="text-xs text-red-600 hover:underline flex items-center"><i class="fa-brands fa-youtube mr-1"></i> Video</a>` : '<span></span>'}
-                  <button onclick="openModalTugas('${m.id}', '${m.judul}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Kirim Tugas</button>
-                </div>
-              </div>
-            `;
-          });
-        }
-      } catch (err) {
-        console.error("Gagal memuat materi", err);
-      }
-    }
-
-    // KIRIM TUGAS SISWA
-    function openModalTugas(id, judul) {
-      document.getElementById('modalMateriId').value = id;
-      document.getElementById('modalTugasTitle').innerText = "Tugas: " + judul;
-      document.getElementById('modalTugas').classList.remove('hidden');
-    }
-
-    function closeModalTugas() {
-      document.getElementById('modalTugas').classList.add('hidden');
-    }
-
-    async function handleKirimTugas(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnSubmitTugas');
-      btn.innerText = "Mengirim...";
-      btn.disabled = true;
-
-      const fileInput = document.getElementById('fileTugasInput').files[0];
-      const materiId = document.getElementById('modalMateriId').value;
-
-      const reader = new FileReader();
-      reader.onload = async function() {
-        const base64Data = reader.result.split(',')[1];
-        
-        const payload = {
-          action: 'kirimTugas',
-          nis: currentUser.id,
-          namaSiswa: currentUser.nama,
-          materiId: materiId,
-          fileName: fileInput.name,
-          fileType: fileInput.type,
-          fileBase64: base64Data
-        };
-
-        try {
-          const res = await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-          const result = await res.json();
-          alert(result.message);
-          closeModalTugas();
-        } catch (err) {
-          alert("Gagal mengunggah tugas: " + err.message);
-        } finally {
-          btn.innerText = "Kirim Berkas";
-          btn.disabled = false;
-        }
-      };
-      reader.readAsDataURL(fileInput);
-    }
-
-    // ADMIN: TAMBAH MATERI
-    async function handleTambahMateri(e) {
-      e.preventDefault();
-      const payload = {
-        action: 'tambahMateri',
-        judul: document.getElementById('addJudul').value,
-        bab: document.getElementById('addBab').value,
-        deskripsi: document.getElementById('addDeskripsi').value,
-        linkVideo: document.getElementById('addLinkVideo').value,
-        fileUrl: document.getElementById('addFileUrl').value
-      };
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-        alert(result.message);
-        e.target.reset();
-      } catch (err) {
-        alert("Gagal menambahkan materi: " + err.message);
-      }
-    }
-
-    // ADMIN: REKAP & INPUT NILAI
-    async function loadRekapAdmin() {
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'getRekapNilai' })
-        });
-        const result = await res.json();
-
-        if (result.success) {
-          const tbody = document.getElementById('tableRekapBody');
-          tbody.innerHTML = "";
-
-          result.data.forEach(r => {
-            tbody.innerHTML += `
-              <tr class="hover:bg-slate-50">
-                <td class="p-3">
-                  <p class="font-bold text-slate-800">${r.nama}</p>
-                  <p class="text-[10px] text-slate-400">NIS: ${r.nis}</p>
-                </td>
-                <td class="p-3 font-mono">${r.materiId}</td>
-                <td class="p-3">
-                  ${r.fileUrl ? `<a href="${r.fileUrl}" target="_blank" class="text-emerald-600 underline font-semibold"><i class="fa-solid fa-file-arrow-down mr-1"></i> Buka File</a>` : '-'}
-                </td>
-                <td class="p-3">
-                  <span class="px-2 py-0.5 text-[10px] rounded font-bold ${r.nilai ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
-                    ${r.nilai ? 'Nilai: ' + r.nilai : r.status}
-                  </span>
-                </td>
-                <td class="p-3">
-                  <div class="flex items-center space-x-1">
-                    <input type="number" id="nilai_${r.tugasId}" placeholder="0-100" class="w-16 px-2 py-1 border rounded outline-none text-xs">
-                    <button onclick="submitNilai('${r.tugasId}')" class="bg-slate-800 hover:bg-slate-900 text-white text-[10px] px-2 py-1 rounded">Simpan</button>
-                  </div>
-                </td>
-              </tr>
-            `;
-          });
-        }
-      } catch (err) {
-        console.error("Gagal memuat rekap admin", err);
-      }
-    }
-
-    async function submitNilai(tugasId) {
-      const nilaiVal = document.getElementById(`nilai_${tugasId}`).value;
-      if (!nilaiVal) return alert("Masukkan nilai angka dahulu!");
-
-      const payload = {
-        action: 'inputNilai',
-        tugasId: tugasId,
-        nilai: nilaiVal,
-        catatan: 'Telah dikoreksi oleh guru.'
-      };
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-        alert(result.message);
-        loadRekapAdmin();
-      } catch (err) {
-        alert("Gagal menyimpan nilai: " + err.message);
-      }
-    }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alertMessage.innerHTML = `
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> Terjadi kesalahan koneksi saat mengirim data.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>`;
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Kirim Data";
+      });
+    });
   </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
